@@ -1,0 +1,7 @@
+logger
+file reader     ✔ (not tested yet)
+
+documentation for each fnc  ✔
+
+services - cloud, llm, dbs, etc
+

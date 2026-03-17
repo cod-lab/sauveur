@@ -7,8 +7,8 @@ from opensearchpy import OpenSearch
 from langchain_core.prompts import ChatPromptTemplate
 
 
-from sauveur.helpers.errors_messages import Error_Messages
-from sauveur.helpers.reponse_status_messages import Response_Status_Messages
+from .helpers.errors_messages import Error_Messages
+from .helpers.reponse_status_messages import Response_Status_Messages
 
 
 class RAG:
@@ -30,6 +30,14 @@ class RAG:
         chunk_overlap: PositiveInt = 0
     ) -> list[dict[str,Any]]:
         """
+        Creates chunks from the given list of items. Each item can be a string, list, tuple or dict. The function uses langchain's RecursiveCharacterTextSplitter for string type items and RecursiveJsonSplitter for list and dict type items to create chunks.
+
+        Args:
+            items (list[str|list|tuple|dict]): List of items to be chunked.
+            chunk_size (int): Size of each chunk. Default is 1500.
+            chunk_overlap (int): Overlap between chunks. Default is 0.
+        Returns:
+            dict: List of items with their chunks and chunking status
         """
         all_chunks = []
 
@@ -50,12 +58,12 @@ class RAG:
 
             if isinstance(item, str):
                 ele['chunks'] = string_splitter.split_text(item)
-                ele['chunking_status'] = Response_Status_Messages.SUCCESS
+                ele['chunking_status'] = Response_Status_Messages.SUCCESS.value
             elif isinstance(item, (list, dict)):
                 ele['chunks'] = json_splitter.split_json(json_data=item)#, convert_lists=True)
-                ele['chunking_status'] = Response_Status_Messages.SUCCESS
+                ele['chunking_status'] = Response_Status_Messages.SUCCESS.value
             else:
-                ele['chunking_status'] = Response_Status_Messages.FAILURE
+                ele['chunking_status'] = Response_Status_Messages.FAILURE.value
                 ele['chunking_error'] = Error_Messages.INVALID_INPUT
 
             all_chunks += [ele]
@@ -73,8 +81,18 @@ class RAG:
         }
     ) -> list[list[PositiveFloat]]:
         """
+        Generates embeddings for the given string or list of strings using specified model.
+
+        Args:
+            docs (list[str] | str): A string or list of strings to generate embeddings for.
+            model_provider (str): Model provider that provides embedding model. Default is 'huggingface'.
+            model_name (str): Model to use for generating embeddings. Default is 'sentence-transformers/all-mpnet-base-v2'.
+            model_dimension (int): Dimension of the model. Default is 768.
+            model_provider_kwargs (dict[str, Any]): Additional configuration to pass to the model provider while creating the model instance. Default is {'encode_kwargs': {"normalize_embeddings": True}}).
+        Returns:
+            list[list[PositiveFloat]]: List of list of embeddings for the given strings.
         """
-        from sauveur.embedder import _Embedder
+        from .embedder import _Embedder
 
         embedder = _Embedder(
             model_provider=model_provider,
@@ -92,22 +110,20 @@ class RAG:
         no_of_docs_per_bulk_object: PositiveInt = 5
     ) -> list[str]:
         """
-        with each doc there should be an index and operation associated and doc_id is mandatory for update and delete opt
-        doc = [
-            {
-                'action': 'create',
-                'index': 'index1',
-                'doc_id': 'id1',
-                'data': {},
-            },
-            {
-                'action': 'create',
-                'index': 'index1',
-                'doc_id': 'id1',
-                'data': {},
-            },
+        Creates bulk objects for OpenSearch bulk API. Each object contains list of docs on which given action (create, update, delete) will be performed.
 
-        ]
+        Args:
+            docs (list[dict[str, Any]]): List of documents to be included in the bulk objects. Each document should have the structure mentioned below.
+            The input docs should be in the following format:
+            {
+                'action': 'create'|'update'|'delete',
+                'index': 'index_name',
+                'doc_id': 'document_id', # mandatory for update and delete operations
+                'data': { ... } # actual doc required for create and update operations
+            }
+            no_of_docs_per_bulk_object (int): Number of documents to be included in each bulk object. Default is 5.
+        Returns:
+            list[str]: List of bulk objects containing multiple docs in string format that can be directly passed to OpenSearch bulk API.
         """
         bulk_docs_body = ''
         bulk_objects = []
@@ -149,6 +165,19 @@ class RAG:
         source_object_attributes: Optional[dict] = None,
     ):
         """
+        Performs similarity search on the given OpenSearch index using the provided query embeddings and returns the most similar documents.
+
+        Args:
+            opensearch_client (OpenSearch): OpenSearch client instance to perform the search.
+            index (str): Name of the OpenSearch index to search.
+            embeddings_field_name (str): Name of the field in the OpenSearch index where document embeddings are stored.
+            query_embeddings (list[float]): Embeddings for the query string.
+            k (int): Number of nearest neighbors to search for. Default is 10.
+            top (int): Number of top similar documents to return. Default is 10.
+            query_object_attributes (Optional[dict]): Additional specifications for the query to be added in query object.
+            source_object_attributes (Optional[dict]): Additional specifications for the source object.
+        Returns:
+            dict: Search results returned by OpenSearch.
         """
         query = {
             "size": top,      # returns top 'size' docs having highest _score, from below "query" result
@@ -175,20 +204,28 @@ class RAG:
         json_chunks: list[dict[str, Any]] = [{}],
     ) -> dict[str, list[dict[str, Any]]]:
         """
-        string_chunks: [
-            {
-                'chunks_type': str,
-                'chunks': ['','',],
-                'metadata': {},
-            },
-        ]
-        json_chunks: [
-            {
-                'chunks_type': [list|dict|tuple]
-                'chunks': ['','',]
-                'metadata': {},
-            },
-        ]
+        Combines chunked documents into a format suitable for understanding.
+        It takes two types of chunks, one string type and another json type, and combines each list of chunks into a single document.
+
+        Args:
+            string_chunks (list[dict[str, Any]]): List of chunks of string type. Each list of dict should have the structure mentioned below.
+            [
+                {
+                    'chunks_type': str,
+                    'chunks': ['','',],
+                    'metadata': {},
+                },
+            ]
+            json_chunks (list[dict[str, Any]]): List of chunks of json type. Each list of dict should have the structure mentioned below.
+            [
+                {
+                    'chunks_type': [list|dict|tuple]
+                    'chunks': ['','',]
+                    'metadata': {},
+                },
+            ]
+        Returns:
+            dict: A dictionary containing two keys 'string_chunks' and 'json_chunks' with their respective combined chunks.
         """
         from langchain_core.documents import Document
 
@@ -229,6 +266,13 @@ class RAG:
         data_for_prompt: Optional[dict[str, str]] = None
     ) -> ChatPromptTemplate:
         """
+        Creates langchain prompt template using the given prompt and data for prompt.
+
+        Args:
+            prompt (str): The data to be passed in the prompt template object.
+            data_for_prompt (Optional[dict[str, str]]): Data to pass in the prompt.
+        Returns:
+            ChatPromptTemplate: Prompt template object of type ChatPromptTemplate library of langchain.
         """
         human_ip = ""
         for k,v in (data_for_prompt or {}).items():
@@ -248,12 +292,18 @@ class RAG:
         data_for_prompt: Optional[dict[str, str]] = None
     ) -> str:
         """
+        Generates answer by invoking the chain of prompt template and provided llm.
+
+        Args:
+            prompt_template (Any): The prompt template object of langchain prompt template library containing the prompt.
+            llm (Any): The language model used to generate answer for the prompt.
+            data_for_prompt (Optional[dict[str, str]]): Data to pass in the chain invocation.
+        Returns:
+            str: The generated answer from the llm.
         """
         answer_chain = prompt_template | llm
         response = answer_chain.invoke(data_for_prompt or {})
 
         return response
-
-
 
 

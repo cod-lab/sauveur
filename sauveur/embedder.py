@@ -1,8 +1,8 @@
 from typing import Any#, Optional
 
-from sauveur.configs.default_env_vars import Default_Env_Vars
-from sauveur.configs.model_providers import Model_Providers, PROVIDER_ALIASES
-from sauveur.helpers.errors_messages import Error_Messages
+from .configs.default_env_vars import Default_Env_Vars
+from .configs.model_providers import Model_Providers, PROVIDER_ALIASES
+from .helpers.errors_messages import Error_Messages
 
 
 class _Embedder:
@@ -13,6 +13,13 @@ class _Embedder:
         model_provider_kwargs: dict[str, Any]
     ) -> None:
         """
+        It is used to create the embedding object for the given model and generate embeddings for the given documents using that embedding object.
+
+        Args:
+            model_provider (str): The name of the model provider.
+            model_name (str): The name of the model which generate the embeddings.
+            model_dimension (int): The dimension of the model.
+            model_provider_kwargs (dict[str, Any]): Additional configuration to pass to the model provider while creating the model instance.
         """
         self._model_provider = model_provider.lower()
         self._model_name = model_name.lower()
@@ -28,6 +35,18 @@ class _Embedder:
 
     def _get_embedding_object(self):
         """
+        It gets the embedding object for a model provider.
+
+        Args: None
+        Returns:
+            OpenAIEmbeddings
+            | GoogleGenerativeAIEmbeddings
+            | BedrockEmbeddings
+            | AzureOpenAIEmbeddings
+            | HuggingFaceEmbeddings
+            : The embedding object created for the given model provider.
+        Raises:
+            ValueError: If the model provider is invalid or not supported.
         """
         if self._model_provider in PROVIDER_ALIASES[Model_Providers.OPENAI]:
             openai_embedder = self._create_embedder_for_openai()
@@ -54,6 +73,14 @@ class _Embedder:
 
     def generate_embeddings(self, docs: list[str]|str=[]) -> list[list[float]]:
         """
+        It generates embeddings for the given string or list of strings.
+
+        Args:
+            docs (list[str]|str): A string or list of strings for which embeddings will be generated.
+        Returns:
+            list[list[float]]: List of list of embeddings for the given strings.
+        Raises:
+            TypeError: If the input is not a string or list of strings.
         """
         if docs in [[],{},set(),(),'']:
             return []
@@ -66,6 +93,11 @@ class _Embedder:
 
     def _create_embedder_for_openai(self):
         """
+        Creates an embedding object for OpenAI.
+
+        Args: None
+        Returns:
+            OpenAIEmbeddings: The embedding object created for OpenAI embeddings.
         """
         from langchain_openai import OpenAIEmbeddings
 
@@ -79,6 +111,11 @@ class _Embedder:
 
     def _create_embedder_for_google(self):
         """
+        Creates an embedding object for Google.
+
+        Args: None
+        Returns:
+            GoogleGenerativeAIEmbeddings: The embedding object created for Google embeddings.
         """
         from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
@@ -92,6 +129,11 @@ class _Embedder:
 
     def _create_embedder_for_aws_bedrock(self):
         """
+        Creates an embedding object for AWS Bedrock.
+
+        Args: None
+        Returns:
+            BedrockEmbeddings: The embedding object created for AWS Bedrock embeddings.
         """
         from langchain_aws import BedrockEmbeddings
 
@@ -105,6 +147,11 @@ class _Embedder:
 
     def _create_embedder_for_azure(self):
         """
+        Creates an embedding object for Azure.
+
+        Args: None
+        Returns:
+            AzureOpenAIEmbeddings: The embedding object created for Azure OpenAI embeddings.
         """
         from langchain_openai import AzureOpenAIEmbeddings
 
@@ -118,6 +165,11 @@ class _Embedder:
 
     def _create_huggingface_embedder(self):
         """
+        Creates an embedding object for Hugging Face.
+
+        Args: None
+        Returns:
+            HuggingFaceEmbeddings: The embedding object created for Hugging Face embeddings.
         """
         from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 
@@ -126,7 +178,4 @@ class _Embedder:
             **self._model_provider_kwargs,
         )
         return embedder
-
-
-
 
