@@ -2,6 +2,7 @@ from pprint import pprint as pp
 
 from sauveur.sauveur import RAG
 # from sauveur.chunking import Chunking
+from .google_api_key import key
 
 obj1 = RAG()
 
@@ -29,7 +30,7 @@ print([obj1.generate_embeddings(
     # model_dimension=768,
     # model_provider_kwargs={
         # 'encode_kwargs':{"normalize_embeddings": True}
-    #     'google_api_key':'AIzaSyB1Y8nopTd5kQYEvah7HlKbUFR2t5U-tns',#AIzaSyAWJyrQTIxhr-GjGP-5v2n8djs3FQqRrjo'
+    #     'google_api_key':key,
     # }
 )[0][:5]],'...')
 # obj2 = Chunking()
