@@ -8,6 +8,7 @@ class File_Reader:
     def _download_and_store_file_temporarily(self, file_path: str) -> str:
         """
         Downloads a file from an URL and stores it temporarily on the local filesystem.
+
         Args:
             file_path (str): URL of the file to download.
         Returns:
@@ -29,6 +30,8 @@ class File_Reader:
 
     def read_txt(self, file_path: str, storage: str = 'local'):
         """
+        It is used to load and read TXT file.
+
         Args:
             file_path (str): Path to the file. Can be a local path or an URL.
             storage (str): Type of storage, either 'local' or 'remote'. Default is 'local'.
@@ -56,6 +59,8 @@ class File_Reader:
 
     def read_json(self, file_path: str, storage: str = 'local', json_indent: Optional[int] = 2) -> str:
         """
+        It is used to load and read JSON file.
+
         Args:
             file_path (str): Path to the file. Can be a local path or an URL.
             storage (str): Type of storage, either 'local' or 'remote'. Default is 'local'.
@@ -88,6 +93,8 @@ class File_Reader:
 
     def read_csv(self, file_path: str, storage: str = 'local', delimiter: str = ',') -> str:
         """
+        It is used to load and read CSV file.
+
         Args:
             file_path (str): Path to the file. Can be a local path or an URL.
             storage (str): Type of storage, either 'local' or 'remote'. Default is 'local'.
@@ -119,6 +126,8 @@ class File_Reader:
 
     def read_excel(self, file_path: str, storage: str = 'local', sheet_name: Optional[str] = None) -> str:
         """
+        It is used to load and read an Excel file.
+
         Args:
             file_path (str): Path to the Excel file. Can be a local path or an URL.
             storage (str): Type of storage, either 'local' or 'remote'. Default is 'local'.
@@ -155,6 +164,8 @@ class File_Reader:
 
     def read_pdf(self, file_path: str, storage: str = 'local') -> str:
         """
+        It is used to load and read PDF file.
+
         Args:
             file_path (str): Path to the PDF file. Can be a local path or an URL.
             storage (str): Type of storage, either 'local' or 'remote'. Default is 'local'.
@@ -188,6 +199,8 @@ class File_Reader:
 
     def read_docx(self, file_path: str, storage: str = 'local') -> str:
         """
+        It is used to load and read DOCX file.
+
         Args:
             file_path (str): Path to the DOCX file. Can be a local path or an URL.
             storage (str): Type of storage, either 'local' or 'remote'. Default is 'local'.
@@ -216,6 +229,8 @@ class File_Reader:
 
     def read_pptx(self, file_path: str, storage: str = 'local') -> str:
         """
+        It is used to load and read PPTX file.
+
         Args:
             file_path (str): Path to the PPTX file. Can be a local path or an URL.
             storage (str): Type of storage, either 'local' or 'remote'. Default is 'local'.
@@ -249,6 +264,8 @@ class File_Reader:
 
     def read_image(self, file_path: str, storage: str = 'local') -> str:
         """
+        It is used to load and read an Image file.
+
         Args:
             file_path (str): Path to the image file. Can be a local path or an URL.
             storage (str): Type of storage, either 'local' or 'remote'. Default is 'local'.
